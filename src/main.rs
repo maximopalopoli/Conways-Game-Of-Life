@@ -1,7 +1,14 @@
 
 fn main() {
+    let mut grid = Grid::new(10, 10);
+    let points = vec![(5, 4), (4, 4), (3, 4)];
+    grid.seed(points);
+    grid.print();
+    println!("");
 
-    println!("Hello, world!");
+    grid.clock();
+    
+    grid.print();
 }
 
 struct Grid {
@@ -30,6 +37,85 @@ impl Grid {
             self.matrix[point.0 as usize][point.1 as usize] = 1;
         }
     }
+
+    fn count_neighbours(&self, x: usize, y: usize) -> u8 {
+        let mut count = 0;
+        count += if x > 0 {
+            let mut partial_count = 0;
+
+            partial_count += if y > 0 { if self.matrix[x-1][y-1] == 1 { 1 } else { 0 } } else { 0 };
+
+            if self.matrix[x-1][y] == 1 {
+                partial_count += 1;
+            }
+
+            partial_count += if y < (self.width - 1) { if self.matrix[x-1][y+1] == 1 { 1 } else { 0 } } else { 0 };
+
+            partial_count
+        } else { 0 };
+
+        count += if y > 0 {
+                let mut partial_count = 0;
+
+                if self.matrix[x][y-1] == 1 {
+                    partial_count += 1;
+                }
+                partial_count += if x < (self.height - 1) { if self.matrix[x+1][y-1] == 1 {1} else { 0 } } else { 0 };
+
+                partial_count
+        } else { 0 }; 
+
+        count += if x < (self.height - 1) {
+                let mut partial_count = 0;
+
+                partial_count += if self.matrix[x+1][y] == 1 { 1 } else { 0 };
+                
+                partial_count += if y < (self.width - 1) {if self.matrix[x+1][y+1] == 1 { 1 } else { 0 } } else { 0 };
+
+                partial_count
+        } else { 0 };
+
+        count += if y < (self.width - 1) { if self.matrix[x][y+1] == 1 { 1 } else { 0 } } else { 0 };
+    
+        count
+    }
+
+    fn clock(&mut self){
+        let mut new_matrix = self.matrix.clone();
+
+        for x in 0..self.width {
+            for y in 0..self.height {
+                let neighbours_ammount = self.count_neighbours(x, y);
+                if neighbours_ammount < 2 && new_matrix[x][y] == 1 {
+                    new_matrix[x][y] = 0;
+                }
+                if (neighbours_ammount == 2 || neighbours_ammount == 3) && new_matrix[x][y] == 1 {
+                    new_matrix[x][y] = 1;
+                }
+                if neighbours_ammount > 3 && new_matrix[x][y] == 1 {
+                    new_matrix[x][y] = 0;
+                }
+                if neighbours_ammount < 2 && new_matrix[x][y] == 1 {
+                    new_matrix[x][y] = 0;
+                }
+                if neighbours_ammount == 3 && new_matrix[x][y] == 0 {
+                    new_matrix[x][y] = 1;
+                }
+            }
+        }
+
+        self.matrix = new_matrix;
+    }
+
+    fn print(&self) {
+        for x in 0..self.width {
+            for y in 0..self.height {
+                print!("{} ", self.matrix[x][y]);
+            }
+            print!("\n");
+        }
+    }
+
 }
 
 #[cfg(test)]
@@ -50,11 +136,44 @@ mod tests {
     fn test_02() {
         // As seed I can give the grid a vector of points, and those points are set in 1 
         let mut grid = Grid::new(10, 10);
-        let points = vec![(4, 4), (3, 4), (5, 4)];
+        let points = vec![(4, 4), (3, 4)];
         grid.seed(points);
 
         assert_eq!(1, grid.matrix[4][4]);
         assert_eq!(1, grid.matrix[3][4]);
+    }
+
+    #[test]
+    fn test_03(){
+        // When making a clock, the points that don't have at least 2 neighbours die
+        let mut grid = Grid::new(10, 10);
+        let points = vec![(4, 4), (3, 4)];
+        grid.seed(points);
+
+        assert_eq!(1, grid.matrix[4][4]);
+        assert_eq!(1, grid.matrix[3][4]);
+
+        grid.clock();
+
+        assert_eq!(0, grid.matrix[4][4]);
+        assert_eq!(0, grid.matrix[3][4]);
+    }
+
+    #[test]
+    fn test_04(){
+        // When making a clock, the points that have at least 2 neighbours survive
+        let mut grid = Grid::new(10, 10);
+        let points = vec![(5, 4), (4, 4), (3, 4)];
+        grid.seed(points);
+
         assert_eq!(1, grid.matrix[5][4]);
+        assert_eq!(1, grid.matrix[4][4]);
+        assert_eq!(1, grid.matrix[3][4]);
+
+        grid.clock();
+
+        assert_eq!(1, grid.matrix[4][3]);
+        assert_eq!(1, grid.matrix[4][4]);
+        assert_eq!(1, grid.matrix[4][5]);
     }
 }
