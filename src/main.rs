@@ -1,14 +1,11 @@
+use std::{thread::sleep, time::Duration};
+
 
 fn main() {
     let mut grid = Grid::new(10, 10);
-    let points = vec![(5, 4), (4, 4), (3, 4)];
+    let points = vec![(5, 4), (4, 4), (3, 4), (4, 3), (4, 5)];
     grid.seed(points);
-    grid.print();
-    println!("");
-
-    grid.clock();
-    
-    grid.print();
+    grid.start();
 }
 
 struct Grid {
@@ -108,11 +105,34 @@ impl Grid {
     }
 
     fn print(&self) {
+        print!("  |");
         for x in 0..self.width {
+            print!("{} ", x);
+        }
+        print!("\n");
+        print!("--|------------------------------\n");
+
+        for x in 0..self.width {
+            print!("{} |", x);
             for y in 0..self.height {
-                print!("{} ", self.matrix[x][y]);
+                if self.matrix[x][y] == 1 { print!("X ")} else { print!("  ")}
+                //print!(" {} ", self.matrix[x][y]);
             }
             print!("\n");
+        }
+        print!("\n");
+    }
+
+    fn start (&mut self) {
+        let mut generation = 0;
+        
+    
+        loop {
+            println!("Generation N˚ {}\n", generation);
+            self.print();
+            self.clock();
+            generation += 1;
+            sleep(Duration::from_secs(3));
         }
     }
 
@@ -166,14 +186,41 @@ mod tests {
         let points = vec![(5, 4), (4, 4), (3, 4)];
         grid.seed(points);
 
-        assert_eq!(1, grid.matrix[5][4]);
         assert_eq!(1, grid.matrix[4][4]);
-        assert_eq!(1, grid.matrix[3][4]);
+
+
+        grid.clock();
+
+        assert_eq!(1, grid.matrix[4][4]);
+    }
+
+    #[test]
+    fn test_05(){
+        // When making a clock, the points that have more than 3 neighbours die
+        let mut grid = Grid::new(10, 10);
+        let points = vec![(5, 4), (4, 4), (3, 4), (4,3), (5,3)];
+        grid.seed(points);
+
+        assert_eq!(1, grid.matrix[4][4]);
+
+        grid.clock();
+
+        assert_eq!(0, grid.matrix[4][4]);
+    }
+
+    #[test]
+    fn test_06(){
+        // When making a clock, the dead points that have exactly 3 live neighbours revives
+        let mut grid = Grid::new(10, 10);
+        let points = vec![(3, 4), (4, 4), (5, 4)];
+        grid.seed(points);
+
+        assert_eq!(0, grid.matrix[4][3]);
+        assert_eq!(0, grid.matrix[4][5]);
 
         grid.clock();
 
         assert_eq!(1, grid.matrix[4][3]);
-        assert_eq!(1, grid.matrix[4][4]);
         assert_eq!(1, grid.matrix[4][5]);
     }
 }
