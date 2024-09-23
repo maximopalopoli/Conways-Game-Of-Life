@@ -18,12 +18,7 @@ impl Grid {
     fn new(width: usize, height: usize) -> Self {
         let mut cells: Vec<Vec<u8>> = Vec::with_capacity(width);
         for _ in 0..width {
-            let mut column = Vec::with_capacity(height);
-            for _ in 0..height {
-                column.push(0);
-            }
-            
-            cells.push(column);
+            cells.push(vec![0;height]);
         }
 
         Self { matrix: cells, width, height }
@@ -80,23 +75,13 @@ impl Grid {
     fn clock(&mut self){
         let mut new_matrix = self.matrix.clone();
 
-        for x in 0..self.width {
-            for y in 0..self.height {
+        for (x, row) in new_matrix.iter_mut().enumerate().take(self.width) {
+            for (y, field) in row.iter_mut().enumerate().take(self.width) {
                 let neighbours_ammount = self.count_neighbours(x, y);
-                if neighbours_ammount < 2 && new_matrix[x][y] == 1 {
-                    new_matrix[x][y] = 0;
-                }
-                if (neighbours_ammount == 2 || neighbours_ammount == 3) && new_matrix[x][y] == 1 {
-                    new_matrix[x][y] = 1;
-                }
-                if neighbours_ammount > 3 && new_matrix[x][y] == 1 {
-                    new_matrix[x][y] = 0;
-                }
-                if neighbours_ammount < 2 && new_matrix[x][y] == 1 {
-                    new_matrix[x][y] = 0;
-                }
-                if neighbours_ammount == 3 && new_matrix[x][y] == 0 {
-                    new_matrix[x][y] = 1;
+                if ((neighbours_ammount == 2 || neighbours_ammount == 3) && *field == 1) || (neighbours_ammount == 3 && *field == 0) {
+                    *field = 1;
+                } else {
+                    *field = 0;
                 }
             }
         }
@@ -109,8 +94,8 @@ impl Grid {
         for x in 0..self.width {
             print!("{} ", x);
         }
-        print!("\n");
-        print!("--|------------------------------\n");
+        println!();
+        println!("--|--------------------");
 
         for x in 0..self.width {
             print!("{} |", x);
@@ -118,9 +103,9 @@ impl Grid {
                 if self.matrix[x][y] == 1 { print!("X ")} else { print!("  ")}
                 //print!(" {} ", self.matrix[x][y]);
             }
-            print!("\n");
+            println!();
         }
-        print!("\n");
+        println!();
     }
 
     fn start (&mut self) {
@@ -222,5 +207,36 @@ mod tests {
 
         assert_eq!(1, grid.matrix[4][3]);
         assert_eq!(1, grid.matrix[4][5]);
+    }
+
+    #[test]
+    fn test_07(){
+        // Try some generations with a certain seed
+        let mut grid = Grid::new(10, 10);
+        let points = vec![(3, 4), (4, 4), (5, 4), (4,3), (4,5)];
+        grid.seed(points);
+
+        grid.clock();
+        grid.clock();
+        grid.clock();
+        grid.clock();
+        grid.clock();
+        grid.clock(); // Generation N˚ 6
+
+        assert_eq!(1, grid.matrix[1][3]);
+        assert_eq!(1, grid.matrix[1][4]);
+        assert_eq!(1, grid.matrix[1][5]);
+
+        assert_eq!(1, grid.matrix[3][1]);
+        assert_eq!(1, grid.matrix[4][1]);
+        assert_eq!(1, grid.matrix[5][1]);
+
+        assert_eq!(1, grid.matrix[7][3]);
+        assert_eq!(1, grid.matrix[7][4]);
+        assert_eq!(1, grid.matrix[7][5]);
+
+        assert_eq!(1, grid.matrix[3][7]);
+        assert_eq!(1, grid.matrix[4][7]);
+        assert_eq!(1, grid.matrix[5][7]);
     }
 }
