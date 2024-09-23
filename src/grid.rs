@@ -21,9 +21,9 @@ impl Grid {
         }
     }
 
-    pub fn seed(&mut self, points: Vec<(i32, i32)>) {
+    pub fn seed(&mut self, points: Vec<(usize, usize)>) {
         for point in points {
-            self.matrix[point.0 as usize][point.1 as usize] = 1;
+            self.matrix[point.0][point.1] = 1;
         }
     }
 
