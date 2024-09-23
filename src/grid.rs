@@ -95,7 +95,7 @@ impl Grid {
         count
     }
 
-    fn clock(&mut self) {
+    pub fn clock(&mut self) {
         let mut new_matrix = self.matrix.clone();
 
         for (x, row) in new_matrix.iter_mut().enumerate().take(self.width) {
@@ -114,7 +114,7 @@ impl Grid {
         self.matrix = new_matrix;
     }
 
-    fn print(&self) {
+    pub fn print(&self) {
         print!("  |");
         for x in 0..self.width {
             print!("{} ", x);
@@ -147,6 +147,14 @@ impl Grid {
             generation += 1;
             sleep(Duration::from_secs(3));
         }
+    }
+
+    pub fn at(&self, x: usize, y: usize) -> u8 {
+        self.matrix[x][y]
+    }
+
+    pub fn dimensions(&self) -> (usize, usize){
+        (self.width, self.height)
     }
 }
 
