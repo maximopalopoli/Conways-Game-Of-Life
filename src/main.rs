@@ -125,11 +125,10 @@ impl Grid {
 
 #[cfg(test)]
 mod tests {
-
-    use super::*;
+    use super::Grid;
 
     #[test]
-    fn test_01() {
+    fn test_01_new_returns_a_valid_matrix() {
         // Create a matrix and it begins initialized with the right ammount of columns and rows, with al the fields in 0
         let grid = Grid::new(10, 10);
         assert_eq!(grid.height, grid.matrix.len());
@@ -138,7 +137,7 @@ mod tests {
     }
 
     #[test]
-    fn test_02() {
+    fn test_02_seed_makes_live_passed_points() {
         // As seed I can give the grid a vector of points, and those points are set in 1 
         let mut grid = Grid::new(10, 10);
         let points = vec![(4, 4), (3, 4)];
@@ -149,7 +148,7 @@ mod tests {
     }
 
     #[test]
-    fn test_03(){
+    fn test_03_clock_makes_die_cells_with_underpopulation(){
         // When making a clock, the points that don't have at least 2 neighbours die
         let mut grid = Grid::new(10, 10);
         let points = vec![(4, 4), (3, 4)];
@@ -165,7 +164,7 @@ mod tests {
     }
 
     #[test]
-    fn test_04(){
+    fn test_04_clock_doesnt_make_die_cells_without_underpopulation_or_overpopulation(){
         // When making a clock, the points that have at least 2 neighbours survive
         let mut grid = Grid::new(10, 10);
         let points = vec![(5, 4), (4, 4), (3, 4)];
@@ -180,7 +179,7 @@ mod tests {
     }
 
     #[test]
-    fn test_05(){
+    fn test_05_clock_makes_die_cells_with_overpopulation(){
         // When making a clock, the points that have more than 3 neighbours die
         let mut grid = Grid::new(10, 10);
         let points = vec![(5, 4), (4, 4), (3, 4), (4,3), (5,3)];
@@ -194,7 +193,7 @@ mod tests {
     }
 
     #[test]
-    fn test_06(){
+    fn test_06_clock_revives_dead_cells_with_exactly_three_neighbours(){
         // When making a clock, the dead points that have exactly 3 live neighbours revives
         let mut grid = Grid::new(10, 10);
         let points = vec![(3, 4), (4, 4), (5, 4)];
@@ -210,7 +209,7 @@ mod tests {
     }
 
     #[test]
-    fn test_07(){
+    fn test_07_scheme_is_the_expected_after_six_generations(){
         // Try some generations with a certain seed
         let mut grid = Grid::new(10, 10);
         let points = vec![(3, 4), (4, 4), (5, 4), (4,3), (4,5)];
