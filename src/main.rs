@@ -10,6 +10,7 @@ const MATRIX_STEP_X:f32 = 20.0;
 const MATRIX_STEP_Y:f32 = 20.0;
 const SQUARE_LENGTH:f32 = 20.0;
 const SQUARE_OFFSET:f32 = 5.0;
+const ARROW_WIDTH: f32 = 5.5;
 
 #[macroquad::main("GameOfLife")]
 async fn main() {
@@ -51,12 +52,23 @@ async fn main() {
             draw_text(i.to_string().as_str(), PISO_X + MATRIX_STEP_X + (i as f32)*20.0 + (i as f32)*SQUARE_OFFSET, PISO_Y + 20.0, TEXT_FONT_SIZE, BLACK);
             //draw_line(PISO_X + MATRIX_STEP_X + (i as f32)*20.0, PISO_Y + 20.0, PISO_X + MATRIX_STEP_X + (i as f32)*20.0, PISO_Y + 20.0 + SQUARE_LENGTH*19.0, 2.5, BLACK);
             // El problema con las lineas es que todavia no pude calibrar el grueso necesario y la posicion adecuada
-        }
+        }   
+        let common_x1 = PISO_X + MATRIX_STEP_X + (grid_width as f32)*20.0 + (grid_width as f32)*SQUARE_OFFSET - 5.0;
+        draw_line(common_x1, PISO_Y + 15.0, common_x1 + 12.5, PISO_Y + 15.0, 2.0, BLACK); // Medio
+        draw_line(common_x1 + ARROW_WIDTH, PISO_Y + 10.0, common_x1 + 12.5, PISO_Y + 15.0, 2.0, BLACK);
+        draw_line(common_x1 + ARROW_WIDTH, PISO_Y + 20.0, common_x1 + 12.5, PISO_Y + 15.0, 2.0, BLACK);
+        draw_text("Y", common_x1 + 15.0 , PISO_Y + 20.0, TEXT_FONT_SIZE, BLACK);
+
 
         // Printea la columna de numeros
         for i in 0..grid_height {
             draw_text(i.to_string().as_str(), PISO_X, PISO_Y + MATRIX_STEP_Y + 20.0 + (i as f32)*20.0 + (i as f32)*SQUARE_OFFSET, TEXT_FONT_SIZE, BLACK);
         }
+        let common_y1 = PISO_Y + MATRIX_STEP_Y + (grid_width as f32)*20.0 + (grid_width as f32)*SQUARE_OFFSET;
+        draw_line(PISO_X + 10.0, common_y1, PISO_X + 10.0, common_y1 + 12.5, 2.0, BLACK);
+        draw_line(PISO_X + 5.0, common_y1 + ARROW_WIDTH, PISO_X + 10.0, common_y1 + 12.5, 2.0, BLACK);
+        draw_line(PISO_X + 15.0, common_y1 + ARROW_WIDTH, PISO_X + 10.0, common_y1 + 12.5, 2.0, BLACK);
+        draw_text("X", PISO_X + 2.5, PISO_Y + MATRIX_STEP_Y + 25.5 + (grid_width as f32)*20.0 + (grid_width as f32)*SQUARE_OFFSET, TEXT_FONT_SIZE, BLACK);
 
         for x in 0..grid_width {
             for y in 0..grid_height {
