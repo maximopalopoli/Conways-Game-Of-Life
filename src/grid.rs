@@ -1,4 +1,4 @@
-use std::ops::RangeInclusive;
+use std::ops::Range;
 use std::thread::sleep;
 use std::time::Duration;
 
@@ -25,13 +25,13 @@ impl Grid {
         }
     }
 
-    fn limited_range_for_number(number: usize, limit: usize) -> RangeInclusive<usize>{
+    fn limited_range_for_number(number: usize, limit: usize) -> Range<usize> {
         if number == 0 {
-            number..=(number + 1)
+            number..(number + 2)
         } else if number == limit - 1 {
-            (number - 1)..=number
+            (number - 1)..(number + 1)
         } else {
-            (number - 1)..=(number + 1)
+            (number - 1)..(number + 2)
         }
     }
 
@@ -39,8 +39,8 @@ impl Grid {
         let mut count = 0;
 
         let range_x = Grid::limited_range_for_number(x, self.width);
-        
-        let range_y = Grid::limited_range_for_number(y, self.height);         
+
+        let range_y = Grid::limited_range_for_number(y, self.height);
 
         for pos_x in range_x.clone() {
             for pos_y in range_y.clone() {
@@ -48,7 +48,7 @@ impl Grid {
                     continue;
                 }
 
-                if self.matrix[pos_x][pos_y]{
+                if self.matrix[pos_x][pos_y] {
                     count += 1;
                 }
             }
@@ -63,13 +63,7 @@ impl Grid {
         for (x, row) in new_matrix.iter_mut().enumerate().take(self.width) {
             for (y, field) in row.iter_mut().enumerate().take(self.width) {
                 let neighbours_amount = self.count_neighbours(x, y);
-                if ((neighbours_amount == 2 || neighbours_amount == 3) && *field == true) ||
-                    (neighbours_amount == 3 && *field == false)
-                {
-                    *field = true;
-                } else {
-                    *field = false;
-                }
+                *field = neighbours_amount == 3 || neighbours_amount == 2 && *field;
             }
         }
 
@@ -87,7 +81,7 @@ impl Grid {
         for x in 0..self.width {
             print!("{} |", x);
             for y in 0..self.height {
-                if self.matrix[x][y] == true {
+                if self.matrix[x][y] {
                     print!("X ")
                 } else {
                     print!("  ")
