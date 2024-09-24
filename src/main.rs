@@ -81,7 +81,7 @@ async fn main() {
 
         for x in 0..grid_width {
             for y in 0..grid_height {
-                if grid.at(x, y) == 1 {
+                if grid.at(x, y) {
                     draw_rectangle(PISO_X + MATRIX_STEP_X + (x as f32)*SQUARE_LENGTH + (x as f32)*SQUARE_OFFSET, PISO_Y + MATRIX_STEP_Y + (y as f32)*SQUARE_LENGTH + (y as f32)*SQUARE_OFFSET, SQUARE_LENGTH, SQUARE_LENGTH, BLACK);
                 } else {
                     draw_rectangle(PISO_X + MATRIX_STEP_X + (x as f32)*SQUARE_LENGTH + (x as f32)*SQUARE_OFFSET, PISO_Y + MATRIX_STEP_Y + (y as f32)*SQUARE_LENGTH + (y as f32)*SQUARE_OFFSET, SQUARE_LENGTH, SQUARE_LENGTH, BLANK);
@@ -131,7 +131,6 @@ async fn main() {
 
                 if chosen_cell_x<grid_width && chosen_cell_y<grid_height {
                     auto_advance = false;
-                    println!("Chosen: {chosen_cell_x}, {chosen_cell_y}, Medidas: {grid_width}, {grid_height}.");
                     grid.change_state_click(chosen_cell_x, chosen_cell_y);
                 }
             }

@@ -10,6 +10,8 @@ Or, if you want to use a predefined seed, you can use:
 
 `cargo run start 1x 1y 2x 2y ... Nx Ny`
 
+Where [(1x, 1y), (2x, 2y) ... (Nx, Ny)] will be the coordinates for the alives cells in the initial seed.
+
 Once the program is opened, you can click on the cells you want to choose as seeds, and by clicking on live cells you can kill them.
 
 The interface options are:
