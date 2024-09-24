@@ -16,23 +16,27 @@ const ARROW_WIDTH: f32 = 5.5;
 #[macroquad::main("GameOfLife")]
 async fn main() {
     let args: Vec<String> = env::args().collect();
-    if args.len() < 3 {
+    if args.len() < 2 {
         println!("Usage: cargo run start 1y 1x 2y 2x ... Ny Nx");
         return;
     }
 
-    let points: Vec<(usize, usize)> = args[2..]
-    .chunks(2)
-    .map(|pair| {
-        let x: usize = pair[0].parse().expect(
-            "Error parseando el primer valor de la coordenada",
-        );
-        let y: usize = pair[1].parse().expect(
-            "Error parseando el segundo valor de la coordenada",
-        );
-        (x, y)
-    })
-    .collect();
+    let points: Vec<(usize, usize)> = if args.len() >= 4 {
+        args[2..]
+        .chunks(2)
+        .map(|pair| {
+            let x: usize = pair[0].parse().expect(
+                "Error parseando el primer valor de la coordenada",
+            );
+            let y: usize = pair[1].parse().expect(
+                "Error parseando el segundo valor de la coordenada",
+            );
+            (x, y)
+        })
+        .collect()
+    } else {
+        Vec::new()
+    };
 
     let mut grid = Grid::new(20, 20);
 
@@ -40,9 +44,10 @@ async fn main() {
 
     let mut generation = 0;
     let mut auto_advance = false;
-    let mut time_sleep = 10.0;
-    let mut time_to_sleep = false;
+    let mut time_sleep = 1.0;
     let mut acc_time = 0.;
+    let mut chosen_cell_x = 0;
+    let mut chosen_cell_y = 0;
 
     loop {
         clear_background(WHITE);
@@ -84,7 +89,7 @@ async fn main() {
             }
         }
 
-        widgets::Window::new(hash!(), vec2(575., 50.), vec2(200., 130.))
+        widgets::Window::new(hash!(), vec2(575., 50.), vec2(220., 170.))
         .label("Options")
         .titlebar(true)
         .ui(&mut *root_ui(), |ui| {
@@ -97,21 +102,48 @@ async fn main() {
             }
             if ui.button(Vec2::new(10., 90.), "Stop automatic advance"){
                 auto_advance = false;
-            }            
-
-            ui.window(hash!(), Vec2::new(575., 180.), Vec2::new(200., 50.), |ui|{
-                ui.slider(hash!(), "[0 .. 100]", 0f32..10f32, &mut time_sleep);
-                if ui.button(Vec2::new(10., 20.), "Set time to sleep"){
-                    time_to_sleep = true;
-                }
-            });
-            
+            }           
+            if ui.button(Vec2::new(10., 130.), "Clear"){
+                grid = Grid::new(grid_width, grid_height);
+                generation = 0;
+                auto_advance = false;
+            }
         });
+
+        widgets::Window::new(hash!(), vec2(575., 240.), vec2(220., 50.))
+        .label("Set time between generations")
+        .titlebar(true)
+        .ui(&mut *root_ui(), |ui| {
+                ui.slider(hash!(), "[0 .. 100]", 0f32..10f32, &mut time_sleep);
+        });
+
+        
+        widgets::Window::new(hash!(), vec2(575., 300.), vec2(220., 40.))
+        .label("Grid change")
+        .titlebar(true)
+        .ui(&mut *root_ui(), |ui| {
+            if is_mouse_button_pressed(MouseButton::Left) {
+                let (mouse_x, mouse_y) = mouse_position();
+                let x_position = mouse_x - 30.0;
+                let y_position = mouse_y - 70.0;
+                chosen_cell_x = (x_position/25.) as usize;
+                chosen_cell_y = (y_position/25.) as usize;
+
+                if chosen_cell_x<grid_width && chosen_cell_y<grid_height {
+                    auto_advance = false;
+                    println!("Chosen: {chosen_cell_x}, {chosen_cell_y}, Medidas: {grid_width}, {grid_height}.");
+                    grid.change_state_click(chosen_cell_x, chosen_cell_y);
+                }
+            }
+
+            ui.label(None, &format!("Chosen cell: {} {}", chosen_cell_x, chosen_cell_y));
+        });
+
 
         let frame_t = get_frame_time();
         acc_time += frame_t;
 
-        if time_to_sleep && auto_advance {
+        if auto_advance {
             if acc_time > time_sleep {
                 grid.clock();
                 generation += 1;
@@ -127,5 +159,5 @@ async fn main() {
     Remaining:
     - Center the numbers
     - Lines between the cells
-    - A simple way for the user to define the seed (like a click on the interface)
+    - Custom Tables
 */

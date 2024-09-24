@@ -1,11 +1,19 @@
 # Conways-Game-Of-Life
 
-An implemention in Rust of the [Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) made by John Conway. This is work in progress.
+An implementation in Rust of the [Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) made by John Conway.
 
 To run the game, use:
 
-`cargo run start 1y 1x 2y 2x ... Ny Nx`
+`cargo run start`
 
-The start functionality will print the status of the current generation, and advance to the next generation every 3 seconds.
+Or, if you want to use a predefined seed, you can use:
 
-In the next versions, there will be easier to pick the points, via UI.
+`cargo run start 1x 1y 2x 2y ... Nx Ny`
+
+Once the program is opened, you can click on the cells you want to choose as seeds, and by clicking on live cells you can kill them.
+
+The interface options are:
+- Next generation to advance the generation manually
+- Automatic advance to have the program advance automatically (it is recommended to define a time between iterations before)
+- Stop automatic advance to stop the automatic advance
+- Clear to reset the table completely

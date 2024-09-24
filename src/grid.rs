@@ -156,6 +156,17 @@ impl Grid {
     pub fn dimensions(&self) -> (usize, usize){
         (self.width, self.height)
     }
+
+    pub fn change_state_click(&mut self, x: usize, y: usize){
+        if x>=self.width || y>=self.height {
+            return;
+        }
+        if self.matrix[x][y] == 1 {
+            self.matrix[x][y] = 0;
+        } else {
+            self.matrix[x][y] = 1;
+        }
+    }
 }
 
 #[cfg(test)]
