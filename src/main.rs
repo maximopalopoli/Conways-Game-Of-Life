@@ -92,7 +92,7 @@ async fn main() {
         widgets::Window::new(hash!(), vec2(575., 50.), vec2(220., 170.))
         .label("Options")
         .titlebar(true)
-        .ui(&mut *root_ui(), |ui| {
+        .ui(&mut root_ui(), |ui| {
             if ui.button(Vec2::new(10., 10.), "Next Generation") {
                 grid.clock();
                 generation += 1;
@@ -113,7 +113,7 @@ async fn main() {
         widgets::Window::new(hash!(), vec2(575., 240.), vec2(220., 50.))
         .label("Set time between generations")
         .titlebar(true)
-        .ui(&mut *root_ui(), |ui| {
+        .ui(&mut root_ui(), |ui| {
                 ui.slider(hash!(), "[0 .. 100]", 0f32..10f32, &mut time_sleep);
         });
 
@@ -121,7 +121,7 @@ async fn main() {
         widgets::Window::new(hash!(), vec2(575., 300.), vec2(220., 40.))
         .label("Grid change")
         .titlebar(true)
-        .ui(&mut *root_ui(), |ui| {
+        .ui(&mut root_ui(), |ui| {
             if is_mouse_button_pressed(MouseButton::Left) {
                 let (mouse_x, mouse_y) = mouse_position();
                 let x_position = mouse_x - 30.0;
@@ -142,12 +142,10 @@ async fn main() {
         let frame_t = get_frame_time();
         acc_time += frame_t;
 
-        if auto_advance {
-            if acc_time > time_sleep {
-                grid.clock();
-                generation += 1;
-                acc_time = 0.;
-            }
+        if auto_advance && acc_time > time_sleep {
+            grid.clock();
+            generation += 1;
+            acc_time = 0.;
         }
 
         next_frame().await
