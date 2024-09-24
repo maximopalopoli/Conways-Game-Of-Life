@@ -13,10 +13,10 @@ fn main() {
         .chunks(2)
         .map(|pair| {
             let x: usize = pair[0].parse().expect(
-                "Error parseando el primer valor de la coordenada",
+                "Error parsing first coordinate value",
             );
             let y: usize = pair[1].parse().expect(
-                "Error parseando el segundo valor de la coordenada",
+                "Error parsing second coordinate value",
             );
             (x, y)
         })
