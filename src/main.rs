@@ -1,7 +1,8 @@
 pub mod grid;
 use grid::Grid;
-use std::{env, thread::sleep, time::Duration};
+use std::env;
 use macroquad::prelude::*;
+use macroquad::ui::*;
 
 const PISO_X:f32 = 10.0;
 const PISO_Y:f32 = 50.0;
@@ -35,10 +36,13 @@ async fn main() {
 
     let mut grid = Grid::new(20, 20);
 
-    //let points = vec![(5, 4), (4, 4), (3, 4), (4, 3), (4, 5)];
     grid.seed(points);
 
     let mut generation = 0;
+    let mut auto_advance = false;
+    let mut time_sleep = 10.0;
+    let mut time_to_sleep = false;
+    let mut acc_time = 0.;
 
     loop {
         clear_background(WHITE);
@@ -80,10 +84,40 @@ async fn main() {
             }
         }
 
-        grid.clock();
-        generation += 1;
+        widgets::Window::new(hash!(), vec2(575., 50.), vec2(200., 130.))
+        .label("Options")
+        .titlebar(true)
+        .ui(&mut *root_ui(), |ui| {
+            if ui.button(Vec2::new(10., 10.), "Next Generation") {
+                grid.clock();
+                generation += 1;
+            }
+            if ui.button(Vec2::new(10., 50.), "Automatic advance"){
+                auto_advance = true;
+            }
+            if ui.button(Vec2::new(10., 90.), "Stop automatic advance"){
+                auto_advance = false;
+            }            
 
-        sleep(Duration::from_secs(3));
+            ui.window(hash!(), Vec2::new(575., 180.), Vec2::new(200., 50.), |ui|{
+                ui.slider(hash!(), "[0 .. 100]", 0f32..10f32, &mut time_sleep);
+                if ui.button(Vec2::new(10., 20.), "Set time to sleep"){
+                    time_to_sleep = true;
+                }
+            });
+            
+        });
+
+        let frame_t = get_frame_time();
+        acc_time += frame_t;
+
+        if time_to_sleep && auto_advance {
+            if acc_time > time_sleep {
+                grid.clock();
+                generation += 1;
+                acc_time = 0.;
+            }
+        }
 
         next_frame().await
     }
@@ -94,5 +128,4 @@ async fn main() {
     - Center the numbers
     - Lines between the cells
     - A simple way for the user to define the seed (like a click on the interface)
-    - An alternate way to make the transitions (Like a next button)
 */
