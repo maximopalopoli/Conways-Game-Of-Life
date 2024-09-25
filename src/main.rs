@@ -149,7 +149,13 @@ async fn main() {
 
     let mut grid = Grid::new(20, 20);
 
-    grid.seed(points);
+    match grid.seed(points) {
+        Err(grid::OutOfTableBoundsError) => {
+            println!("At least one point of the received by terminal are out of the table bounds. The bounds are: width: {}, height: {}", grid.dimensions().0, grid.dimensions().1);
+            return;
+        }
+        Ok(_) => {}
+    }
 
     let mut generation = 0;
     let mut acc_time = 0.;

@@ -1,4 +1,14 @@
+use core::fmt;
 use std::ops::Range;
+
+#[derive(Debug, Clone)]
+pub struct OutOfTableBoundsError;
+
+impl fmt::Display for OutOfTableBoundsError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "At least one point passed is out of the table bounds")
+    }
+}
 
 /// Represents the Game of Life Grid
 pub struct Grid {
@@ -19,11 +29,19 @@ impl Grid {
         }
     }
 
+    fn point_in_bounds(&self, point: (usize, usize)) -> bool{
+        point.0 < self.width && point.1 <self.height
+    }
+
     /// When used, make alive the cells with the coordinates of the points received
-    pub fn seed(&mut self, points: Vec<(usize, usize)>) {
+    pub fn seed(&mut self, points: Vec<(usize, usize)>) -> Result<(), OutOfTableBoundsError>{
         for point in points {
+            if !self.point_in_bounds(point){
+                return Err(OutOfTableBoundsError);
+            }
             self.matrix[point.0][point.1] = true;
         }
+        Ok(())
     }
 
     /// Handles the error where point is on table edge, and neighbor is invalid.
@@ -38,7 +56,7 @@ impl Grid {
         }
     }
 
-    /// Counts how many square neighbours does the cell have
+    /// Counts how many square neighbours does the cell have.
     fn count_neighbours(&self, x: usize, y: usize) -> u8 {
         let mut count = 0;
 
@@ -87,6 +105,9 @@ impl Grid {
 
     /// Used to create the seed manually (on UI version)
     pub fn change_state_click(&mut self, x: usize, y: usize) {
+        if x>=self.width || y>=self.height {
+            return;
+        }
         self.matrix[x][y] = !self.matrix[x][y];
     }
 
@@ -115,7 +136,7 @@ mod tests {
         // As seed I can give the grid a vector of points, and those points are set in 1
         let mut grid = Grid::new(10, 10);
         let points = vec![(4, 4), (3, 4)];
-        grid.seed(points);
+        grid.seed(points).unwrap();
 
         assert_eq!(true, grid.matrix[4][4]);
         assert_eq!(true, grid.matrix[3][4]);
@@ -126,7 +147,7 @@ mod tests {
         // When making a clock, the points that don't have at least 2 neighbours die
         let mut grid = Grid::new(10, 10);
         let points = vec![(4, 4), (3, 4)];
-        grid.seed(points);
+        grid.seed(points).unwrap();
 
         assert_eq!(true, grid.matrix[4][4]);
         assert_eq!(true, grid.matrix[3][4]);
@@ -142,7 +163,7 @@ mod tests {
         // When making a clock, the points that have at least 2 neighbours survive
         let mut grid = Grid::new(10, 10);
         let points = vec![(5, 4), (4, 4), (3, 4)];
-        grid.seed(points);
+        grid.seed(points).unwrap();
 
         assert_eq!(true, grid.matrix[4][4]);
 
@@ -157,7 +178,7 @@ mod tests {
         // When making a clock, the points that have more than 3 neighbours die
         let mut grid = Grid::new(10, 10);
         let points = vec![(5, 4), (4, 4), (3, 4), (4, 3), (5, 3)];
-        grid.seed(points);
+        grid.seed(points).unwrap();
 
         assert_eq!(true, grid.matrix[4][4]);
 
@@ -171,7 +192,7 @@ mod tests {
         // When making a clock, the dead points that have exactly 3 live neighbours revives
         let mut grid = Grid::new(10, 10);
         let points = vec![(3, 4), (4, 4), (5, 4)];
-        grid.seed(points);
+        grid.seed(points).unwrap();
 
         assert_eq!(false, grid.matrix[4][3]);
         assert_eq!(false, grid.matrix[4][5]);
@@ -187,7 +208,7 @@ mod tests {
         // Try some generations with a certain seed
         let mut grid = Grid::new(10, 10);
         let points = vec![(3, 4), (4, 4), (5, 4), (4, 3), (4, 5)];
-        grid.seed(points);
+        grid.seed(points).unwrap();
 
         grid.clock();
         grid.clock();
