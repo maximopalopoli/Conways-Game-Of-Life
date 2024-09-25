@@ -2,8 +2,10 @@ use std::ops::Range;
 use std::thread::sleep;
 use std::time::Duration;
 
+/// Represents the Game of Life Grid
 pub struct Grid {
     matrix: Vec<Vec<bool>>,
+    /// I keep these parameters to make easier the calcs
     width: usize,
     height: usize,
 }
@@ -19,12 +21,15 @@ impl Grid {
         }
     }
 
+    /// When used, make alive the cells with the coordinates of the points received
     pub fn seed(&mut self, points: Vec<(usize, usize)>) {
         for point in points {
             self.matrix[point.0][point.1] = true;
         }
     }
 
+    /// Handles the error where point is on table edge, and neighbor is invalid.
+    /// Assumes that the lower limit is 0.
     fn limited_range_for_number(number: usize, limit: usize) -> Range<usize> {
         if number == 0 {
             number..(number + 2)
@@ -35,14 +40,14 @@ impl Grid {
         }
     }
 
+    /// Counts how many square neighbours does the cell have
     fn count_neighbours(&self, x: usize, y: usize) -> u8 {
         let mut count = 0;
 
         let range_x = Grid::limited_range_for_number(x, self.width);
-
         let range_y = Grid::limited_range_for_number(y, self.height);
 
-        for pos_x in range_x.clone() {
+        for pos_x in range_x {
             for pos_y in range_y.clone() {
                 if pos_x == x && pos_y == y {
                     continue;
@@ -57,6 +62,8 @@ impl Grid {
         count
     }
 
+    /// Executes the logic of the generation change.
+    /// Needs a matrix clone to isolate the transition of each cell
     pub fn clock(&mut self) {
         let mut new_matrix = self.matrix.clone();
 
@@ -105,22 +112,22 @@ impl Grid {
         }
     }
 
+    /// Like a getter of a certain position of the grid
     pub fn at(&self, x: usize, y: usize) -> bool {
         self.matrix[x][y]
     }
 
+    /// A getter of the dimensions of the table
     pub fn dimensions(&self) -> (usize, usize) {
         (self.width, self.height)
     }
 
+    /// Used to create the seed manually (on UI version)
     pub fn change_state_click(&mut self, x: usize, y: usize) {
-        if x>=self.width || y>=self.height {
-            return;
-        }
-
         self.matrix[x][y] = !self.matrix[x][y];
     }
 
+    /// Used instead of the creation of a new matrix
     pub fn reset(&mut self) {
         self.matrix = vec![vec![false; self.height]; self.width];
     }
