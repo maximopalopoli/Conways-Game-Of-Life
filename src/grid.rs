@@ -1,6 +1,4 @@
 use std::ops::Range;
-use std::thread::sleep;
-use std::time::Duration;
 
 /// Represents the Game of Life Grid
 pub struct Grid {
@@ -75,41 +73,6 @@ impl Grid {
         }
 
         self.matrix = new_matrix;
-    }
-
-    pub fn print(&self) {
-        print!("  |");
-        for x in 0..self.width {
-            print!("{} ", x);
-        }
-        println!();
-        println!("--|--------------------");
-
-        for x in 0..self.width {
-            print!("{} |", x);
-            for y in 0..self.height {
-                if self.matrix[x][y] {
-                    print!("X ")
-                } else {
-                    print!("  ")
-                }
-                //print!(" {} ", self.matrix[x][y]);
-            }
-            println!();
-        }
-        println!();
-    }
-
-    pub fn start(&mut self) {
-        let mut generation = 0;
-
-        loop {
-            println!("Generation N˚ {}\n", generation);
-            self.print();
-            self.clock();
-            generation += 1;
-            sleep(Duration::from_secs(3));
-        }
     }
 
     /// Like a getter of a certain position of the grid
