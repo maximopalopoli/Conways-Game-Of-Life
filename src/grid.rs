@@ -1,7 +1,6 @@
 use std::ops::Range;
 use std::thread::sleep;
 use std::time::Duration;
-use std::ops::Range;
 
 pub struct Grid {
     matrix: Vec<Vec<bool>>,
@@ -110,16 +109,20 @@ impl Grid {
         self.matrix[x][y]
     }
 
-    pub fn dimensions(&self) -> (usize, usize){
+    pub fn dimensions(&self) -> (usize, usize) {
         (self.width, self.height)
     }
 
-    pub fn change_state_click(&mut self, x: usize, y: usize){
+    pub fn change_state_click(&mut self, x: usize, y: usize) {
         if x>=self.width || y>=self.height {
             return;
         }
 
         self.matrix[x][y] = !self.matrix[x][y];
+    }
+
+    pub fn reset(&mut self) {
+        self.matrix = vec![vec![false; self.height]; self.width];
     }
 }
 
