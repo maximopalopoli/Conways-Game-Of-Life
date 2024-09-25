@@ -1,5 +1,6 @@
 pub mod grid;
 use grid::Grid;
+use grid::OutOfTableBoundsError;
 use std::env;
 use macroquad::prelude::*;
 use macroquad::ui::*;
@@ -16,7 +17,8 @@ const ARROW_WIDTH: f32 = 5.5;
 /// Prints the numbers of the Y axis, the Y and the arrow 
 fn draw_y_axis(grid_width: usize){
     for i in 0..grid_width {
-        draw_text(i.to_string().as_str(), FLOOR_X + MATRIX_STEP_X + (i as f32)*20.0 + (i as f32)*SQUARE_OFFSET, FLOOR_Y + 20.0, TEXT_FONT_SIZE, BLACK);
+        draw_text(i.to_string().as_str(), FLOOR_X + MATRIX_STEP_X + (i as f32)*20.0 + (i as f32)*SQUARE_OFFSET, 
+        FLOOR_Y + 20.0, TEXT_FONT_SIZE, BLACK);
     }   
     let common_x1 = FLOOR_X + MATRIX_STEP_X + (grid_width as f32)*20.0 + (grid_width as f32)*SQUARE_OFFSET - 5.0;
     draw_line(common_x1, FLOOR_Y + 15.0, common_x1 + 12.5, FLOOR_Y + 15.0, 2.0, BLACK);
@@ -28,13 +30,15 @@ fn draw_y_axis(grid_width: usize){
 /// Prints the numbers of the X axis, the X and the arrow 
 fn draw_x_axis(grid_height: usize){
     for i in 0..grid_height {
-        draw_text(i.to_string().as_str(), FLOOR_X, FLOOR_Y + MATRIX_STEP_Y + 20.0 + (i as f32)*20.0 + (i as f32)*SQUARE_OFFSET, TEXT_FONT_SIZE, BLACK);
+        draw_text(i.to_string().as_str(), FLOOR_X, FLOOR_Y + MATRIX_STEP_Y + 20.0 + (i as f32)*20.0 + (i as f32)*SQUARE_OFFSET,
+         TEXT_FONT_SIZE, BLACK);
     }
     let common_y1 = FLOOR_Y + MATRIX_STEP_Y + (grid_height as f32)*20.0 + (grid_height as f32)*SQUARE_OFFSET - 5.0;
     draw_line(FLOOR_X + 10.0, common_y1 + 5., FLOOR_X + 10.0, common_y1 + 17.5, 2.0, BLACK);
     draw_line(FLOOR_X + 5.0, common_y1 + 5. + ARROW_WIDTH, FLOOR_X + 10.0, common_y1 + 17.5, 2.0, BLACK);
     draw_line(FLOOR_X + 15.0, common_y1 + 5. + ARROW_WIDTH, FLOOR_X + 10.0, common_y1 + 17.5, 2.0, BLACK);
-    draw_text("X", FLOOR_X + 2.5, FLOOR_Y + MATRIX_STEP_Y + 25.5 + (grid_height as f32)*20.0 + (grid_height as f32)*SQUARE_OFFSET, TEXT_FONT_SIZE, BLACK);
+    draw_text("X", FLOOR_X + 2.5, FLOOR_Y + MATRIX_STEP_Y + 25.5 + (grid_height as f32)*20.0 + (grid_height as f32)*SQUARE_OFFSET, 
+    TEXT_FONT_SIZE, BLACK);
 }
 
 /// Draws the grid, when the cells are alive draws a black square, and if not, a blank one
@@ -49,9 +53,12 @@ fn draw_grid(grid: &mut Grid) {
     for x in 0..grid_width {
         for y in 0..grid_height {
             if grid.at(x, y) {
-                draw_rectangle(FLOOR_X + MATRIX_STEP_X + (x as f32)*SQUARE_LENGTH + (x as f32)*SQUARE_OFFSET, FLOOR_Y + MATRIX_STEP_Y + (y as f32)*SQUARE_LENGTH + (y as f32)*SQUARE_OFFSET, SQUARE_LENGTH, SQUARE_LENGTH, BLACK);
+                draw_rectangle(FLOOR_X + MATRIX_STEP_X + (x as f32)*SQUARE_LENGTH + (x as f32)*SQUARE_OFFSET,
+                 FLOOR_Y + MATRIX_STEP_Y + (y as f32)*SQUARE_LENGTH + (y as f32)*SQUARE_OFFSET, SQUARE_LENGTH, 
+                 SQUARE_LENGTH, BLACK);
             } else {
-                draw_rectangle(FLOOR_X + MATRIX_STEP_X + (x as f32)*SQUARE_LENGTH + (x as f32)*SQUARE_OFFSET, FLOOR_Y + MATRIX_STEP_Y + (y as f32)*SQUARE_LENGTH + (y as f32)*SQUARE_OFFSET, SQUARE_LENGTH, SQUARE_LENGTH, BLANK);
+                draw_rectangle(FLOOR_X + MATRIX_STEP_X + (x as f32)*SQUARE_LENGTH + (x as f32)*SQUARE_OFFSET, FLOOR_Y
+                 + MATRIX_STEP_Y + (y as f32)*SQUARE_LENGTH + (y as f32)*SQUARE_OFFSET, SQUARE_LENGTH, SQUARE_LENGTH, BLANK);
             }
         }
     }
@@ -149,12 +156,10 @@ async fn main() {
 
     let mut grid = Grid::new(20, 20);
 
-    match grid.seed(points) {
-        Err(grid::OutOfTableBoundsError) => {
-            println!("At least one point of the received by terminal are out of the table bounds. The bounds are: width: {}, height: {}", grid.dimensions().0, grid.dimensions().1);
-            return;
-        }
-        Ok(_) => {}
+    if let Err(OutOfTableBoundsError) = grid.seed(points) {
+        println!("At least one point of the received by terminal are out of the table bounds. The bounds are: 
+            width: {}, height: {}", grid.dimensions().0, grid.dimensions().1);
+        return;
     }
 
     let mut generation = 0;

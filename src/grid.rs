@@ -29,14 +29,14 @@ impl Grid {
         }
     }
 
-    fn point_in_bounds(&self, point: (usize, usize)) -> bool{
-        point.0 < self.width && point.1 <self.height
+    fn point_in_bounds(&self, point: (usize, usize)) -> bool {
+        point.0 < self.width && point.1 < self.height
     }
 
     /// When used, make alive the cells with the coordinates of the points received
-    pub fn seed(&mut self, points: Vec<(usize, usize)>) -> Result<(), OutOfTableBoundsError>{
+    pub fn seed(&mut self, points: Vec<(usize, usize)>) -> Result<(), OutOfTableBoundsError> {
         for point in points {
-            if !self.point_in_bounds(point){
+            if !self.point_in_bounds(point) {
                 return Err(OutOfTableBoundsError);
             }
             self.matrix[point.0][point.1] = true;
@@ -105,7 +105,7 @@ impl Grid {
 
     /// Used to create the seed manually (on UI version)
     pub fn change_state_click(&mut self, x: usize, y: usize) {
-        if x>=self.width || y>=self.height {
+        if x >= self.width || y >= self.height {
             return;
         }
         self.matrix[x][y] = !self.matrix[x][y];
