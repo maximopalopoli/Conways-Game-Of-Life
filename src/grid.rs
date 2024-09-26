@@ -1,12 +1,14 @@
 use core::fmt;
 use std::ops::Range;
 
-#[derive(Debug, Clone)]
-pub struct OutOfTableBoundsError;
+#[derive(Debug)]
+pub struct OutOfTableBoundsError {
+    point: (usize, usize),
+}
 
 impl fmt::Display for OutOfTableBoundsError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "At least one point passed is out of the table bounds")
+        write!(f, "Point out of bounds: ({}, {})", self.point.0, self.point.1)
     }
 }
 
@@ -37,7 +39,7 @@ impl Grid {
     pub fn seed(&mut self, points: Vec<(usize, usize)>) -> Result<(), OutOfTableBoundsError> {
         for point in points {
             if !self.point_in_bounds(point) {
-                return Err(OutOfTableBoundsError);
+                return Err(OutOfTableBoundsError{point});
             }
             self.matrix[point.0][point.1] = true;
         }
@@ -94,8 +96,13 @@ impl Grid {
     }
 
     /// Like a getter of a certain position of the grid
-    pub fn at(&self, x: usize, y: usize) -> bool {
-        self.matrix[x][y]
+    pub fn at(&self, x: usize, y: usize) -> Result<bool, OutOfTableBoundsError> {
+        if !self.point_in_bounds((x, y)) {
+            Err(OutOfTableBoundsError{point: (x, y)})
+        } else {
+            Ok(self.matrix[x][y])
+        }
+        
     }
 
     /// A getter of the dimensions of the table

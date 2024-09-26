@@ -1,6 +1,5 @@
 pub mod grid;
 use grid::Grid;
-use grid::OutOfTableBoundsError;
 use macroquad::prelude::*;
 use macroquad::ui::*;
 use std::env;
@@ -119,34 +118,46 @@ fn draw_grid(grid: &mut Grid) {
     // To draw the cells
     for x in 0..grid_width {
         for y in 0..grid_height {
-            if grid.at(x, y) {
-                draw_rectangle(
-                    FLOOR_X
-                        + MATRIX_STEP_X
-                        + (x as f32) * SQUARE_LENGTH
-                        + (x as f32) * SQUARE_OFFSET,
-                    FLOOR_Y
-                        + MATRIX_STEP_Y
-                        + (y as f32) * SQUARE_LENGTH
-                        + (y as f32) * SQUARE_OFFSET,
-                    SQUARE_LENGTH,
-                    SQUARE_LENGTH,
-                    BLACK,
-                );
-            } else {
-                draw_rectangle(
-                    FLOOR_X
-                        + MATRIX_STEP_X
-                        + (x as f32) * SQUARE_LENGTH
-                        + (x as f32) * SQUARE_OFFSET,
-                    FLOOR_Y
-                        + MATRIX_STEP_Y
-                        + (y as f32) * SQUARE_LENGTH
-                        + (y as f32) * SQUARE_OFFSET,
-                    SQUARE_LENGTH,
-                    SQUARE_LENGTH,
-                    BLANK,
-                );
+            match grid.at(x, y){  
+                Err(error) => {
+                    println!(
+                        "Error: {}. The bounds are: width: {}, height: {}",
+                        error,
+                        grid.dimensions().0,
+                        grid.dimensions().1
+                    );
+                },
+                Ok(res) => {                    
+                    if res {
+                        draw_rectangle(
+                            FLOOR_X
+                                + MATRIX_STEP_X
+                                + (x as f32) * SQUARE_LENGTH
+                                + (x as f32) * SQUARE_OFFSET,
+                            FLOOR_Y
+                                + MATRIX_STEP_Y
+                                + (y as f32) * SQUARE_LENGTH
+                                + (y as f32) * SQUARE_OFFSET,
+                            SQUARE_LENGTH,
+                            SQUARE_LENGTH,
+                            BLACK,
+                        );
+                    } else {
+                        draw_rectangle(
+                            FLOOR_X
+                                + MATRIX_STEP_X
+                                + (x as f32) * SQUARE_LENGTH
+                                + (x as f32) * SQUARE_OFFSET,
+                            FLOOR_Y
+                                + MATRIX_STEP_Y
+                                + (y as f32) * SQUARE_LENGTH
+                                + (y as f32) * SQUARE_OFFSET,
+                            SQUARE_LENGTH,
+                            SQUARE_LENGTH,
+                            BLANK,
+                        );
+                    }
+                },
             }
         }
     }
@@ -250,9 +261,13 @@ async fn main() {
 
     let mut grid = Grid::new(20, 20);
 
-    if let Err(OutOfTableBoundsError) = grid.seed(points) {
-        println!("At least one point of the received by terminal are out of the table bounds. The bounds are: 
-            width: {}, height: {}", grid.dimensions().0, grid.dimensions().1);
+    if let Err(error) = grid.seed(points) {
+        println!(
+            "Error: {}. The bounds are: width: {}, height: {}",
+            error,
+            grid.dimensions().0,
+            grid.dimensions().1
+        );
         return;
     }
 
