@@ -238,7 +238,12 @@ pub fn windows_logic(
 async fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
-        println!("Usage: cargo run start 1y 1x 2y 2x ... Ny Nx");
+        println!("Usage: 'cargo run start 1y 1x 2y 2x ... Ny Nx', or just 'cargo start'");
+        return;
+    }
+
+    if args.len() % 2 != 0 {
+        println!("Program arguments after 'start' must be pairs to make points");
         return;
     }
 
