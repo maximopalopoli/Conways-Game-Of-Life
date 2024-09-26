@@ -107,7 +107,9 @@ fn draw_x_axis(grid_height: usize) {
     );
 }
 
-/// Draws the grid, when the cells are alive draws a black square, and if not, a blank one
+/// Draws the grid,including the cells and the axes
+///
+/// When the cells are alive draws a black square, and if not, a blank one
 fn draw_grid(grid: &mut Grid) {
     let (grid_width, grid_height) = grid.dimensions();
 
@@ -118,7 +120,7 @@ fn draw_grid(grid: &mut Grid) {
     // To draw the cells
     for x in 0..grid_width {
         for y in 0..grid_height {
-            match grid.at(x, y){  
+            match grid.at(x, y) {
                 Err(error) => {
                     println!(
                         "Error: {}. The bounds are: width: {}, height: {}",
@@ -126,8 +128,8 @@ fn draw_grid(grid: &mut Grid) {
                         grid.dimensions().0,
                         grid.dimensions().1
                     );
-                },
-                Ok(res) => {                    
+                }
+                Ok(res) => {
                     if res {
                         draw_rectangle(
                             FLOOR_X
@@ -157,13 +159,14 @@ fn draw_grid(grid: &mut Grid) {
                             BLANK,
                         );
                     }
-                },
+                }
             }
         }
     }
 }
 
 /// Here remains the logic of the windows of options on the right side of the screen.
+///
 /// The main window handles the advance options and the reset one. The second handles
 /// the setting of the time between generations, and the third shows the last grid that
 /// had a change of state (and handles the change)
