@@ -167,7 +167,6 @@ mod tests {
 
         assert_eq!(true, grid.matrix[4][4]);
 
-
         grid.clock();
 
         assert_eq!(true, grid.matrix[4][4]);
