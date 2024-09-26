@@ -241,7 +241,7 @@ pub fn windows_logic(
 async fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
-        println!("Usage: 'cargo run start 1y 1x 2y 2x ... Ny Nx', or just 'cargo start'");
+        println!("Usage: 'cargo run start 1y 1x 2y 2x ... Ny Nx', or just 'cargo run start'");
         return;
     }
 
