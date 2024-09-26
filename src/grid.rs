@@ -135,7 +135,7 @@ mod tests {
         let grid = Grid::new(10, 10);
         assert_eq!(grid.height, grid.matrix.len());
         assert_eq!(grid.width, grid.matrix.get(0).unwrap().len());
-        assert_eq!(false, grid.matrix[0][0]);
+        assert_eq!(false, grid.at(0, 0).unwrap());
     }
 
     #[test]
@@ -145,8 +145,8 @@ mod tests {
         let points = vec![(4, 4), (3, 4)];
         grid.seed(points).unwrap();
 
-        assert_eq!(true, grid.matrix[4][4]);
-        assert_eq!(true, grid.matrix[3][4]);
+        assert_eq!(true, grid.at(4, 4).unwrap());
+        assert_eq!(true, grid.at(3, 4).unwrap());
     }
 
     #[test]
@@ -156,13 +156,13 @@ mod tests {
         let points = vec![(4, 4), (3, 4)];
         grid.seed(points).unwrap();
 
-        assert_eq!(true, grid.matrix[4][4]);
-        assert_eq!(true, grid.matrix[3][4]);
+        assert_eq!(true, grid.at(4, 4).unwrap());
+        assert_eq!(true, grid.at(3, 4).unwrap());
 
         grid.clock();
 
-        assert_eq!(false, grid.matrix[4][4]);
-        assert_eq!(false, grid.matrix[3][4]);
+        assert_eq!(false, grid.at(4, 4).unwrap());
+        assert_eq!(false, grid.at(3, 4).unwrap());
     }
 
     #[test]
@@ -172,11 +172,11 @@ mod tests {
         let points = vec![(5, 4), (4, 4), (3, 4)];
         grid.seed(points).unwrap();
 
-        assert_eq!(true, grid.matrix[4][4]);
+        assert_eq!(true, grid.at(4, 4).unwrap());
 
         grid.clock();
 
-        assert_eq!(true, grid.matrix[4][4]);
+        assert_eq!(true, grid.at(4, 4).unwrap());
     }
 
     #[test]
@@ -186,11 +186,11 @@ mod tests {
         let points = vec![(5, 4), (4, 4), (3, 4), (4, 3), (5, 3)];
         grid.seed(points).unwrap();
 
-        assert_eq!(true, grid.matrix[4][4]);
+        assert_eq!(true, grid.at(4, 4).unwrap());
 
         grid.clock();
 
-        assert_eq!(false, grid.matrix[4][4]);
+        assert_eq!(false, grid.at(4, 4).unwrap());
     }
 
     #[test]
@@ -200,13 +200,13 @@ mod tests {
         let points = vec![(3, 4), (4, 4), (5, 4)];
         grid.seed(points).unwrap();
 
-        assert_eq!(false, grid.matrix[4][3]);
-        assert_eq!(false, grid.matrix[4][5]);
+        assert_eq!(false, grid.at(4, 3).unwrap());
+        assert_eq!(false, grid.at(4, 5).unwrap());
 
         grid.clock();
 
-        assert_eq!(true, grid.matrix[4][3]);
-        assert_eq!(true, grid.matrix[4][5]);
+        assert_eq!(true, grid.at(4, 3).unwrap());
+        assert_eq!(true, grid.at(4, 5).unwrap());
     }
 
     #[test]
@@ -223,20 +223,20 @@ mod tests {
         grid.clock();
         grid.clock(); // Generation N˚ 6
 
-        assert_eq!(true, grid.matrix[1][3]);
-        assert_eq!(true, grid.matrix[1][4]);
-        assert_eq!(true, grid.matrix[1][5]);
+        assert_eq!(true, grid.at(1, 3).unwrap());
+        assert_eq!(true, grid.at(1, 4).unwrap());
+        assert_eq!(true, grid.at(1, 5).unwrap());
 
-        assert_eq!(true, grid.matrix[3][1]);
-        assert_eq!(true, grid.matrix[4][1]);
-        assert_eq!(true, grid.matrix[5][1]);
+        assert_eq!(true, grid.at(3, 1).unwrap());
+        assert_eq!(true, grid.at(4, 1).unwrap());
+        assert_eq!(true, grid.at(5, 1).unwrap());
 
-        assert_eq!(true, grid.matrix[7][3]);
-        assert_eq!(true, grid.matrix[7][4]);
-        assert_eq!(true, grid.matrix[7][5]);
+        assert_eq!(true, grid.at(7, 3).unwrap());
+        assert_eq!(true, grid.at(7, 4).unwrap());
+        assert_eq!(true, grid.at(7, 5).unwrap());
 
-        assert_eq!(true, grid.matrix[3][7]);
-        assert_eq!(true, grid.matrix[4][7]);
-        assert_eq!(true, grid.matrix[5][7]);
+        assert_eq!(true, grid.at(3, 7).unwrap());
+        assert_eq!(true, grid.at(4, 7).unwrap());
+        assert_eq!(true, grid.at(5, 7).unwrap());
     }
 }
