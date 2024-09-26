@@ -1,9 +1,25 @@
+use core::fmt;
 use std::ops::Range;
-use std::thread::sleep;
-use std::time::Duration;
 
+#[derive(Debug)]
+pub struct OutOfTableBoundsError {
+    point: (usize, usize),
+}
+
+impl fmt::Display for OutOfTableBoundsError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "Point out of bounds: ({}, {})",
+            self.point.0, self.point.1
+        )
+    }
+}
+
+/// Represents the Game of Life Grid
 pub struct Grid {
     matrix: Vec<Vec<bool>>,
+    /// I keep these parameters to make easier the calcs
     width: usize,
     height: usize,
 }
@@ -19,12 +35,23 @@ impl Grid {
         }
     }
 
-    pub fn seed(&mut self, points: Vec<(usize, usize)>) {
-        for point in points {
-            self.matrix[point.0][point.1] = true;
-        }
+    fn point_in_bounds(&self, point: (usize, usize)) -> bool {
+        point.0 < self.width && point.1 < self.height
     }
 
+    /// When used, make alive the cells with the coordinates of the points received
+    pub fn seed(&mut self, points: Vec<(usize, usize)>) -> Result<(), OutOfTableBoundsError> {
+        for point in points {
+            if !self.point_in_bounds(point) {
+                return Err(OutOfTableBoundsError { point });
+            }
+            self.matrix[point.0][point.1] = true;
+        }
+        Ok(())
+    }
+
+    /// Handles the error where point is on table edge, and neighbor is invalid.
+    /// Assumes that the lower limit is 0.
     fn limited_range_for_number(number: usize, limit: usize) -> Range<usize> {
         if number == 0 {
             number..(number + 2)
@@ -35,14 +62,14 @@ impl Grid {
         }
     }
 
+    /// Counts how many square neighbours does the cell have.
     fn count_neighbours(&self, x: usize, y: usize) -> u8 {
         let mut count = 0;
 
         let range_x = Grid::limited_range_for_number(x, self.width);
-
         let range_y = Grid::limited_range_for_number(y, self.height);
 
-        for pos_x in range_x.clone() {
+        for pos_x in range_x {
             for pos_y in range_y.clone() {
                 if pos_x == x && pos_y == y {
                     continue;
@@ -57,6 +84,8 @@ impl Grid {
         count
     }
 
+    /// Executes the logic of the generation change.
+    /// Needs a matrix clone to isolate the transition of each cell
     pub fn clock(&mut self) {
         let mut new_matrix = self.matrix.clone();
 
@@ -70,57 +99,29 @@ impl Grid {
         self.matrix = new_matrix;
     }
 
-    pub fn print(&self) {
-        print!("  |");
-        for x in 0..self.width {
-            print!("{} ", x);
-        }
-        println!();
-        println!("--|--------------------");
-
-        for x in 0..self.width {
-            print!("{} |", x);
-            for y in 0..self.height {
-                if self.matrix[x][y] {
-                    print!("X ")
-                } else {
-                    print!("  ")
-                }
-                //print!(" {} ", self.matrix[x][y]);
-            }
-            println!();
-        }
-        println!();
-    }
-
-    pub fn start(&mut self) {
-        let mut generation = 0;
-
-        loop {
-            println!("Generation N˚ {}\n", generation);
-            self.print();
-            self.clock();
-            generation += 1;
-            sleep(Duration::from_secs(3));
+    /// Like a getter of a certain position of the grid
+    pub fn at(&self, x: usize, y: usize) -> Result<bool, OutOfTableBoundsError> {
+        if !self.point_in_bounds((x, y)) {
+            Err(OutOfTableBoundsError { point: (x, y) })
+        } else {
+            Ok(self.matrix[x][y])
         }
     }
 
-    pub fn at(&self, x: usize, y: usize) -> bool {
-        self.matrix[x][y]
-    }
-
+    /// A getter of the dimensions of the table
     pub fn dimensions(&self) -> (usize, usize) {
         (self.width, self.height)
     }
 
+    /// Used to create the seed manually (on UI version)
     pub fn change_state_click(&mut self, x: usize, y: usize) {
-        if x>=self.width || y>=self.height {
+        if x >= self.width || y >= self.height {
             return;
         }
-
         self.matrix[x][y] = !self.matrix[x][y];
     }
 
+    /// Used instead of the creation of a new matrix
     pub fn reset(&mut self) {
         self.matrix = vec![vec![false; self.height]; self.width];
     }
@@ -137,7 +138,7 @@ mod tests {
         let grid = Grid::new(10, 10);
         assert_eq!(grid.height, grid.matrix.len());
         assert_eq!(grid.width, grid.matrix.get(0).unwrap().len());
-        assert_eq!(false, grid.matrix[0][0]);
+        assert_eq!(false, grid.at(0, 0).unwrap());
     }
 
     #[test]
@@ -145,10 +146,10 @@ mod tests {
         // As seed I can give the grid a vector of points, and those points are set in 1
         let mut grid = Grid::new(10, 10);
         let points = vec![(4, 4), (3, 4)];
-        grid.seed(points);
+        grid.seed(points).unwrap();
 
-        assert_eq!(true, grid.matrix[4][4]);
-        assert_eq!(true, grid.matrix[3][4]);
+        assert_eq!(true, grid.at(4, 4).unwrap());
+        assert_eq!(true, grid.at(3, 4).unwrap());
     }
 
     #[test]
@@ -156,15 +157,15 @@ mod tests {
         // When making a clock, the points that don't have at least 2 neighbours die
         let mut grid = Grid::new(10, 10);
         let points = vec![(4, 4), (3, 4)];
-        grid.seed(points);
+        grid.seed(points).unwrap();
 
-        assert_eq!(true, grid.matrix[4][4]);
-        assert_eq!(true, grid.matrix[3][4]);
+        assert_eq!(true, grid.at(4, 4).unwrap());
+        assert_eq!(true, grid.at(3, 4).unwrap());
 
         grid.clock();
 
-        assert_eq!(false, grid.matrix[4][4]);
-        assert_eq!(false, grid.matrix[3][4]);
+        assert_eq!(false, grid.at(4, 4).unwrap());
+        assert_eq!(false, grid.at(3, 4).unwrap());
     }
 
     #[test]
@@ -172,14 +173,13 @@ mod tests {
         // When making a clock, the points that have at least 2 neighbours survive
         let mut grid = Grid::new(10, 10);
         let points = vec![(5, 4), (4, 4), (3, 4)];
-        grid.seed(points);
+        grid.seed(points).unwrap();
 
-        assert_eq!(true, grid.matrix[4][4]);
-
+        assert_eq!(true, grid.at(4, 4).unwrap());
 
         grid.clock();
 
-        assert_eq!(true, grid.matrix[4][4]);
+        assert_eq!(true, grid.at(4, 4).unwrap());
     }
 
     #[test]
@@ -187,13 +187,13 @@ mod tests {
         // When making a clock, the points that have more than 3 neighbours die
         let mut grid = Grid::new(10, 10);
         let points = vec![(5, 4), (4, 4), (3, 4), (4, 3), (5, 3)];
-        grid.seed(points);
+        grid.seed(points).unwrap();
 
-        assert_eq!(true, grid.matrix[4][4]);
+        assert_eq!(true, grid.at(4, 4).unwrap());
 
         grid.clock();
 
-        assert_eq!(false, grid.matrix[4][4]);
+        assert_eq!(false, grid.at(4, 4).unwrap());
     }
 
     #[test]
@@ -201,15 +201,15 @@ mod tests {
         // When making a clock, the dead points that have exactly 3 live neighbours revives
         let mut grid = Grid::new(10, 10);
         let points = vec![(3, 4), (4, 4), (5, 4)];
-        grid.seed(points);
+        grid.seed(points).unwrap();
 
-        assert_eq!(false, grid.matrix[4][3]);
-        assert_eq!(false, grid.matrix[4][5]);
+        assert_eq!(false, grid.at(4, 3).unwrap());
+        assert_eq!(false, grid.at(4, 5).unwrap());
 
         grid.clock();
 
-        assert_eq!(true, grid.matrix[4][3]);
-        assert_eq!(true, grid.matrix[4][5]);
+        assert_eq!(true, grid.at(4, 3).unwrap());
+        assert_eq!(true, grid.at(4, 5).unwrap());
     }
 
     #[test]
@@ -217,7 +217,7 @@ mod tests {
         // Try some generations with a certain seed
         let mut grid = Grid::new(10, 10);
         let points = vec![(3, 4), (4, 4), (5, 4), (4, 3), (4, 5)];
-        grid.seed(points);
+        grid.seed(points).unwrap();
 
         grid.clock();
         grid.clock();
@@ -226,20 +226,20 @@ mod tests {
         grid.clock();
         grid.clock(); // Generation N˚ 6
 
-        assert_eq!(true, grid.matrix[1][3]);
-        assert_eq!(true, grid.matrix[1][4]);
-        assert_eq!(true, grid.matrix[1][5]);
+        assert_eq!(true, grid.at(1, 3).unwrap());
+        assert_eq!(true, grid.at(1, 4).unwrap());
+        assert_eq!(true, grid.at(1, 5).unwrap());
 
-        assert_eq!(true, grid.matrix[3][1]);
-        assert_eq!(true, grid.matrix[4][1]);
-        assert_eq!(true, grid.matrix[5][1]);
+        assert_eq!(true, grid.at(3, 1).unwrap());
+        assert_eq!(true, grid.at(4, 1).unwrap());
+        assert_eq!(true, grid.at(5, 1).unwrap());
 
-        assert_eq!(true, grid.matrix[7][3]);
-        assert_eq!(true, grid.matrix[7][4]);
-        assert_eq!(true, grid.matrix[7][5]);
+        assert_eq!(true, grid.at(7, 3).unwrap());
+        assert_eq!(true, grid.at(7, 4).unwrap());
+        assert_eq!(true, grid.at(7, 5).unwrap());
 
-        assert_eq!(true, grid.matrix[3][7]);
-        assert_eq!(true, grid.matrix[4][7]);
-        assert_eq!(true, grid.matrix[5][7]);
+        assert_eq!(true, grid.at(3, 7).unwrap());
+        assert_eq!(true, grid.at(4, 7).unwrap());
+        assert_eq!(true, grid.at(5, 7).unwrap());
     }
 }
